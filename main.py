@@ -17,7 +17,6 @@ gameOn = True
 seconds = 0
 shapesCreating = {}
 shapesCounter = 0
-allowed = True
 shouldCreateNewPiece = True
 clearLines = 19
 FPS = 60
@@ -38,26 +37,26 @@ def readTheLines(lines):
     recordHolder = ""
     mode = 0
     for ind, i in enumerate(lines):
-        for k in i:
-            if k != ":" and mode == 0:
-                theScore += k
-            elif k != ":" and mode == 1:
-                recordHolder += k
-            elif k == ":" and mode == 0:
-                scores.append([int(theScore), 0])
-                theScore = ""
-                mode = 1
-            elif k == ":" and mode == 1:
-                scores[ind][1] = recordHolder
-                recordHolder = ""
-                mode = 0
-                break
+        if i:
+            for k in i:
+                if k != ":" and mode == 0:
+                    theScore += k
+                elif k != ":" and mode == 1:
+                    recordHolder += k
+                elif k == ":" and mode == 0:
+                    scores.append([int(theScore), 0])
+                    theScore = ""
+                    mode = 1
+                elif k == ":" and mode == 1:
+                    scores[ind][1] = recordHolder
+                    recordHolder = ""
+                    mode = 0
+                    break
     scores.sort()
     f.close()
 
 readTheLines(lines)
 
-print(scores)
 
 pygame.init()
 Display = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -80,7 +79,6 @@ if scores:
 timeText = font.render("Time", True, (255, 255, 255))
 printTheNewRecord = fontOver.render("New Record!", True, (66, 80, 30))
 beginning = time.time()
-
 
 
 class Playfield:
@@ -142,16 +140,11 @@ class Playfield:
                             scoreText = font.render(str(score), True, (255, 255, 255))
                             return
                 if ida == len(self.landscape[i]) - 1 and clear == 0:
-                    #print("The reason for removal: ")
-                    #print(self.landscape[19 - i])
                     self.landscape[19 - i] = [-1, -1, -1, -1, -1, -1, -1, -1, -1, -1]
                     toBringDown += 1
                     clearLines += 1
                 elif toBringDown != 0 and ida == 9:
-                    #print("Should be working on ", self.landscape[19 - i])
-                    #print(self.landscape[19 - i - toBringDown])
                     self.landscape[19 - i + toBringDown] = self.landscape[19 - i]
-
 
 
 listOfButtons = [pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'cyan_tetromino.jpg')),
@@ -211,11 +204,11 @@ class Piece:
             self.coordinates = [ [4,0], [5, 0], [4, 1], [5, 1]]
             self.form = Forms.sq
         elif shape == 4:
-            self.coordinates = [ [4, 0], [5, 0], [4, 1], [3, 1]]    #ZZZZZZZZZZZZ
-            self.form = Forms.k                                #ZZZZZZZZZZ
+            self.coordinates = [ [4, 0], [5, 0], [4, 1], [3, 1]]    #Z
+            self.form = Forms.k                                
         elif shape == 5:
-            self.coordinates = [[3, 0], [4, 0], [4, 1], [5, 1]]  #ZZZZZZZZ
-            self.form = Forms.Z                                 #      ZZZZZZZZZ
+            self.coordinates = [[3, 0], [4, 0], [4, 1], [5, 1]]  
+            self.form = Forms.Z                                 
         elif shape == 6:
             self.coordinates = [[4, 0], [3, 1], [4, 1], [5, 1]]
             self.form = Forms.WASD
@@ -419,14 +412,13 @@ def controlTheShape(shape:Piece, direction:int):
         pass
 
 
-
 def Timing_Thread():
     global timer, text, endGame
     initially = time.time()
     waiting = 1
     theList = [0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
     order = -1
-    while allowed:
+    while True:
         currently = time.time()
         if not endGame:
             timer = int(currently - beginning)
@@ -521,16 +513,13 @@ while gameOn:
                     f.close()
                     if score > scores[-1][0]:
                         theRecordHolderName = font.render(name, True, (255, 255, 255))
-                        theRecord = score
+                        theRecord = font.render(score, True, (255, 255, 255))
                     scores.append([score, name])
                     scores.sort()
                     shouldCreateNewPiece = True
                     playfield = Playfield()
-                    name, score = "", "000000"
                     scoreText = font.render(str(score), True, (255, 255, 255))
-                    beginning = time.time()
-                    endGame = False
-                    theNewRecord = False
+                    name, score, beginning, endGame, theNewRecord, waiting, order, initially, currently = "", "000000", time.time(), False, False, 1, -1, time.time(), time.time()
                 elif event.key == pygame.K_BACKSPACE:
                     if len(name) != 0:
                         name = name[:-1]
